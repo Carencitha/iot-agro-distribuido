@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard IoT Agrícola</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>Dashboard IoT Agrícola Distribuido</h1>
+    <p>Monitoreo de temperatura y humedad en tiempo real</p>
+</header>
+
+<main>
+    <section class="metrics">
+        <div class="card">
+            <h2>Nodo actual</h2>
+            <p id="nodeId">---</p>
+        </div>
+
+        <div class="card">
+            <h2>Total de lecturas</h2>
+            <p id="totalReadings">0</p>
+        </div>
+
+        <div class="card">
+            <h2>Estado</h2>
+            <p id="status">---</p>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="section-header">
+            <h2>Últimas lecturas procesadas</h2>
+            <button onclick="loadDashboard()">Actualizar</button>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Nodo origen</th>
+                <th>Sensor</th>
+                <th>Temperatura</th>
+                <th>Humedad</th>
+                <th>Estado</th>
+                <th>Procesado por</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+            <tbody id="readingsTable">
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
