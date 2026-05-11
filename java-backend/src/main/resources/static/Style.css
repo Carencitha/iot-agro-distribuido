@@ -1,105 +1,485 @@
+/* ============================================================
+   Dashboard IoT Agrícola — style.css
+   Paleta: verde musgo · hoja · crema · ámbar dorado
+   ============================================================ */
+
+/* ── 1. Variables de diseño ─────────────────────────────── */
+:root {
+    --soil:       #3B2A1A;
+    --bark:       #5C3D2E;
+    --moss:       #2D4A22;
+    --leaf:       #4A7C3F;
+    --sprout:     #6FAE5F;
+    --sage:       #A8C5A0;
+    --mist:       #E8F0E5;
+    --cream:      #F5F0E8;
+    --amber:      #C8892A;
+    --gold:       #E8B84B;
+    --white:      #FDFCFA;
+
+    --text-dark:  #1E2B1A;
+    --text-mid:   #4A5E42;
+    --text-soft:  #7A9170;
+
+    --border:     rgba(74, 124, 63, 0.15);
+    --shadow-sm:  0 2px 8px  rgba(45, 74, 34, 0.08);
+    --shadow-md:  0 6px 24px rgba(45, 74, 34, 0.12);
+    --shadow-lg:  0 16px 48px rgba(45, 74, 34, 0.16);
+
+    --radius-sm:  8px;
+    --radius-md:  14px;
+    --radius-lg:  22px;
+}
+
+/* ── 2. Reset base ──────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f1f5f4;
-    color: #1f2933;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    line-height: 1.6;
 }
 
+/* ── 3. Textura de fondo ────────────────────────────────── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+            radial-gradient(ellipse 80% 60% at 10% 0%, rgba(111, 174, 95, 0.10) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 80% at 90% 100%, rgba(200, 137, 42, 0.07) 0%, transparent 60%),
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a7c3f' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── 4. Contenedor principal ────────────────────────────── */
+.container {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 28px 60px;
+}
+
+/* ── 5. Header ──────────────────────────────────────────── */
 header {
-    background: #166534;
-    color: white;
-    text-align: center;
-    padding: 25px;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 32px;
-}
-
-header p {
-    margin-top: 8px;
-    font-size: 16px;
-}
-
-main {
-    padding: 25px;
-}
-
-.metrics {
+    padding: 40px 0 36px;
     display: flex;
-    gap: 20px;
-    margin-bottom: 25px;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.header-icon {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--moss), var(--leaf));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    font-size: 24px;
+}
+
+.header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    color: var(--moss);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+.header-text p {
+    font-size: 0.88rem;
+    color: var(--text-soft);
+    font-weight: 400;
+    margin-top: 3px;
+}
+
+.header-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--mist);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 7px 16px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--leaf);
+}
+
+/* Indicador de pulso animado */
+.pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sprout);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+    }
+}
+
+/* ── 6. Tarjetas de métricas ────────────────────────────── */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s ease both;
 }
 
 .card {
-    flex: 1;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 26px 28px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s, transform 0.25s;
+}
+
+/* Línea decorativa superior */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--leaf), var(--sprout));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .card h2 {
-    font-size: 18px;
-    color: #374151;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    margin-bottom: 10px;
 }
 
 .card p {
-    font-size: 28px;
-    font-weight: bold;
-    color: #166534;
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--moss);
+    line-height: 1;
 }
 
-.content {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+/* ── 7. Panel ───────────────────────────────────────────── */
+.panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease 0.1s both;
 }
 
-.section-header {
+.panel-head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(to right, rgba(232, 240, 229, 0.6), transparent);
 }
 
-button {
-    background: #166534;
-    color: white;
+.panel-head-left h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--moss);
+    font-weight: 400;
+}
+
+.panel-head-left p {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    margin-top: 3px;
+}
+
+.panel-body {
+    padding: 28px;
+}
+
+/* ── 8. Botones ─────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
     border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    margin-bottom: 15px;
+    padding: 9px 20px;
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
 }
 
-button:hover {
-    background: #14532d;
+.btn-primary {
+    background: linear-gradient(135deg, var(--moss), var(--leaf));
+    color: var(--white);
+    box-shadow: 0 3px 12px rgba(45, 74, 34, 0.25);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 5px 18px rgba(45, 74, 34, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--mist);
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--sage);
+    color: var(--moss);
+}
+
+.btn-refresh {
+    background: var(--mist);
+    color: var(--leaf);
+    border: 1px solid var(--border);
+}
+
+.btn-refresh:hover {
+    background: var(--sage);
+}
+
+/* ── 9. Formulario ──────────────────────────────────────── */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    margin-bottom: 7px;
+}
+
+.form-group input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--text-dark);
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-group input:focus {
+    border-color: var(--leaf);
+    box-shadow: 0 0 0 3px rgba(74, 124, 63, 0.12);
+    background: var(--white);
+}
+
+.form-group input::placeholder {
+    color: var(--text-soft);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#manualMessage {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: var(--leaf);
+    font-weight: 500;
+    min-height: 20px;
+}
+
+/* ── 10. Tabla ──────────────────────────────────────────── */
+.table-wrap {
+    overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.875rem;
 }
 
-th {
-    background: #dcfce7;
+thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-soft);
+    padding: 0 14px 14px;
+    border-bottom: 1.5px solid var(--border);
 }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #d1d5db;
-    text-align: center;
+tbody tr {
+    border-bottom: 1px solid rgba(74, 124, 63, 0.07);
+    transition: background 0.15s;
 }
 
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: rgba(232, 240, 229, 0.5);
+}
+
+tbody td {
+    padding: 13px 14px;
+    color: var(--text-dark);
+    vertical-align: middle;
+}
+
+/* ── 11. Badges de estado ───────────────────────────────── */
+.badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+}
+
+.badge-ok {
+    background: rgba(111, 174, 95, 0.18);
+    color: var(--moss);
+}
+
+.badge-warn {
+    background: rgba(200, 137, 42, 0.15);
+    color: var(--amber);
+}
+
+.badge-error {
+    background: rgba(180, 60, 50, 0.12);
+    color: #B43C32;
+}
+
+/* ── 12. Estados de lectura ─────────────────────────────── */
 .status-normal {
-    color: #166534;
-    font-weight: bold;
+    color: var(--leaf);
+    font-weight: 700;
 }
 
 .status-alert {
-    color: #b91c1c;
-    font-weight: bold;
+    color: #B43C32;
+    font-weight: 700;
+}
+
+/* ── 13. Mensajes del formulario manual ─────────────────── */
+.message-ok {
+    color: var(--leaf) !important;
+    font-weight: 600;
+}
+
+.message-error {
+    color: #B43C32 !important;
+    font-weight: 600;
+}
+
+/* ── 14. Lecturas manuales ──────────────────────────────── */
+.manual-reading {
+    background: rgba(232, 184, 75, 0.22);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+}
+
+.manual-reading td {
+    color: var(--soil);
+}
+
+.manual-reading:hover {
+    background: rgba(232, 184, 75, 0.34);
+}
+
+/* ── 15. Animaciones ────────────────────────────────────── */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── 16. Responsive ─────────────────────────────────────── */
+@media (max-width: 720px) {
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .panel-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .container {
+        padding: 0 16px 40px;
+    }
 }
