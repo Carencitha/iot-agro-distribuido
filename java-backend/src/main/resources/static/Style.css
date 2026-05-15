@@ -167,7 +167,6 @@ header {
     transition: box-shadow 0.25s, transform 0.25s;
 }
 
-/* Línea decorativa superior */
 .card::before {
     content: '';
     position: absolute;
@@ -302,8 +301,10 @@ header {
     margin-bottom: 7px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
+    min-height: 46px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.92rem;
     color: var(--text-dark);
@@ -312,10 +313,11 @@ header {
     border-radius: var(--radius-sm);
     padding: 11px 14px;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.2s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     border-color: var(--leaf);
     box-shadow: 0 0 0 3px rgba(74, 124, 63, 0.12);
     background: var(--white);
@@ -325,6 +327,72 @@ header {
     color: var(--text-soft);
 }
 
+/* ── Select bonito para sensores ───────────────────────── */
+.form-group select {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--moss);
+    padding: 11px 46px 11px 14px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-color: var(--cream);
+    background-image:
+            linear-gradient(45deg, transparent 50%, var(--leaf) 50%),
+            linear-gradient(135deg, var(--leaf) 50%, transparent 50%),
+            linear-gradient(to right, rgba(74, 124, 63, 0.22), rgba(74, 124, 63, 0.22));
+    background-position:
+            calc(100% - 23px) 50%,
+            calc(100% - 16px) 50%,
+            calc(100% - 43px) 50%;
+    background-size:
+            7px 7px,
+            7px 7px,
+            1px 26px;
+    background-repeat: no-repeat;
+
+    box-shadow: inset 0 1px 2px rgba(45, 74, 34, 0.04);
+}
+
+.form-group select:hover {
+    background-color: #fffaf2;
+    border-color: rgba(74, 124, 63, 0.35);
+    transform: translateY(-1px);
+}
+
+.form-group select:focus {
+    background-color: var(--white);
+    border-color: var(--leaf);
+    box-shadow: 0 0 0 4px rgba(74, 124, 63, 0.14);
+}
+
+.form-group select option {
+    background: var(--white);
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* Nodo origen bloqueado */
+.form-group input[readonly] {
+    background:
+            linear-gradient(135deg, rgba(232, 240, 229, 0.95), rgba(245, 240, 232, 0.8));
+    color: var(--moss);
+    font-weight: 800;
+    cursor: not-allowed;
+    border-color: rgba(74, 124, 63, 0.26);
+    box-shadow: inset 0 1px 2px rgba(45, 74, 34, 0.05);
+}
+
+/* Opcional: pequeño efecto visual cuando el nodo está bloqueado */
+.form-group input[readonly]:focus {
+    background:
+            linear-gradient(135deg, rgba(232, 240, 229, 0.95), rgba(245, 240, 232, 0.8));
+    border-color: rgba(74, 124, 63, 0.35);
+    box-shadow: 0 0 0 3px rgba(74, 124, 63, 0.08);
+}
+
+/* ── Acciones formulario ───────────────────────────────── */
 .form-actions {
     display: flex;
     align-items: center;

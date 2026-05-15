@@ -1,3 +1,5 @@
+let currentNodeId = "";
+
 async function loadDashboard() {
     await loadMetrics();
     await loadReadings();
@@ -6,19 +8,81 @@ async function loadDashboard() {
 async function loadMetrics() {
     try {
         const response = await fetch("/api/metrics");
+
+        if (!response.ok) {
+            throw new Error("Error cargando métricas");
+        }
+
         const data = await response.json();
 
-        document.getElementById("nodeId").textContent = data.nodeId;
-        document.getElementById("totalReadings").textContent = data.totalReadings;
-        document.getElementById("status").textContent = data.status;
+        currentNodeId = data.nodeId;
+
+        document.getElementById("nodeId").textContent = data.nodeId || "---";
+        document.getElementById("totalReadings").textContent = data.totalReadings ?? 0;
+        document.getElementById("status").textContent = data.status || "---";
+
+        configureManualForm(data.nodeId);
+
     } catch (error) {
         console.error("Error cargando métricas:", error);
+        document.getElementById("status").textContent = "ERROR";
     }
+}
+
+function configureManualForm(nodeId) {
+    const nodeInput = document.getElementById("manualNodeId");
+    const sensorSelect = document.getElementById("manualSensorId");
+
+    if (!nodeInput || !sensorSelect || !nodeId) {
+        return;
+    }
+
+    /*
+        El nodo origen queda fijo según la máquina actual.
+        Ejemplo:
+        - Caren: machine-1
+        - Fredy: machine-2
+        - André: machine-3
+    */
+    nodeInput.value = nodeId;
+    nodeInput.readOnly = true;
+
+    /*
+        Evita recargar el desplegable cada 3 segundos.
+    */
+    if (sensorSelect.dataset.loadedFor === nodeId) {
+        return;
+    }
+
+    sensorSelect.innerHTML = "";
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Seleccione un sensor";
+    sensorSelect.appendChild(defaultOption);
+
+    /*
+        Sensores manuales disponibles.
+        Estos salen iguales en todas las máquinas.
+    */
+    for (let i = 1; i <= 5; i++) {
+        const option = document.createElement("option");
+        option.value = `manual-sensor-${i}`;
+        option.textContent = `manual-sensor-${i}`;
+        sensorSelect.appendChild(option);
+    }
+
+    sensorSelect.dataset.loadedFor = nodeId;
 }
 
 async function loadReadings() {
     try {
         const response = await fetch("/api/readings");
+
+        if (!response.ok) {
+            throw new Error("Error cargando lecturas");
+        }
+
         const data = await response.json();
 
         const table = document.getElementById("readingsTable");
@@ -29,15 +93,13 @@ async function loadReadings() {
 
             /*
                 Se obtiene el sensor_id teniendo en cuenta dos posibles formatos:
-                - sensor_id: cuando viene desde la base de datos/PostgreSQL.
-                - sensorId: cuando viene directamente desde JavaScript o Java.
+                - sensor_id: cuando viene desde PostgreSQL.
+                - sensorId: cuando viene desde Java/JavaScript.
             */
             const sensorId = reading.sensor_id || reading.sensorId || "";
 
             /*
-                Se convierte a minúscula para reconocer lecturas manuales
-                sin importar si se escriben como:
-                MANUAL-sensor-1, manual-sensor-1, Manual-sensor-1, etc.
+                Reconoce lecturas manuales sin importar mayúsculas/minúsculas.
             */
             const sensorIdLower = sensorId.toLowerCase();
 
@@ -60,8 +122,7 @@ async function loadReadings() {
             `;
 
             /*
-                Si la lectura es manual, se aplica una clase CSS y además
-                se refuerza el estilo directamente en las celdas.
+                Si la lectura es manual, se resalta en la tabla.
             */
             if (isManualReading) {
                 row.classList.add("manual-reading");
@@ -77,22 +138,33 @@ async function loadReadings() {
 
             table.appendChild(row);
         });
+
     } catch (error) {
         console.error("Error cargando lecturas:", error);
     }
 }
 
 async function sendManualReading() {
-    const nodeId = document.getElementById("manualNodeId").value.trim();
-    const sensorIdInput = document.getElementById("manualSensorId").value.trim();
+    const nodeId = currentNodeId || document.getElementById("manualNodeId").value.trim();
+    const sensorId = document.getElementById("manualSensorId").value;
     const temperatureInput = document.getElementById("manualTemperature").value;
     const humidityInput = document.getElementById("manualHumidity").value;
 
     const temperature = Number(temperatureInput);
     const humidity = Number(humidityInput);
 
-    if (!nodeId || !sensorIdInput || temperatureInput === "" || humidityInput === "") {
-        showManualMessage("Completa todos los campos antes de guardar.", false);
+    if (!nodeId) {
+        showManualMessage("No se pudo identificar el nodo actual.", false);
+        return;
+    }
+
+    if (!sensorId) {
+        showManualMessage("Seleccione un sensor antes de guardar.", false);
+        return;
+    }
+
+    if (temperatureInput === "" || humidityInput === "") {
+        showManualMessage("Completa temperatura y humedad antes de guardar.", false);
         return;
     }
 
@@ -110,20 +182,6 @@ async function sendManualReading() {
         showManualMessage("La humedad debe estar entre 0% y 100%.", false);
         return;
     }
-
-    /*
-        Se revisa el sensor en minúscula para evitar duplicar el prefijo.
-        Si el usuario escribe:
-        - sensor-1        -> se guarda como MANUAL-sensor-1
-        - manual-sensor-1 -> se guarda igual
-        - MANUAL-sensor-1 -> se guarda igual
-        - Manual-sensor-1 -> se guarda igual
-    */
-    const sensorIdLower = sensorIdInput.toLowerCase();
-
-    const sensorId = sensorIdLower.startsWith("manual")
-        ? sensorIdInput
-        : `MANUAL-${sensorIdInput}`;
 
     const reading = {
         nodeId: nodeId,
@@ -158,6 +216,7 @@ async function sendManualReading() {
         document.getElementById("manualHumidity").value = "";
 
         await loadDashboard();
+
     } catch (error) {
         console.error(error);
         showManualMessage("No se pudo guardar la lectura manual.", false);
@@ -165,10 +224,14 @@ async function sendManualReading() {
 }
 
 function clearManualForm() {
-    document.getElementById("manualNodeId").value = "";
     document.getElementById("manualSensorId").value = "";
     document.getElementById("manualTemperature").value = "";
     document.getElementById("manualHumidity").value = "";
+
+    if (currentNodeId) {
+        document.getElementById("manualNodeId").value = currentNodeId;
+    }
+
     showManualMessage("", true);
 }
 

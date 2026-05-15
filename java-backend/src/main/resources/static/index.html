@@ -51,25 +51,34 @@
                 <p>Ingresa temperatura y humedad para procesarla en el sistema distribuido.</p>
             </div>
         </div>
+
         <div class="panel-body">
             <div class="form-grid">
+
                 <div class="form-group">
                     <label for="manualNodeId">Nodo origen</label>
-                    <input type="text" id="manualNodeId" placeholder="machine-1">
+                    <input type="text" id="manualNodeId" readonly>
                 </div>
+
                 <div class="form-group">
                     <label for="manualSensorId">Sensor</label>
-                    <input type="text" id="manualSensorId" placeholder="manual-sensor-1">
+                    <select id="manualSensorId">
+                        <option value="">Seleccione un sensor</option>
+                    </select>
                 </div>
+
                 <div class="form-group">
                     <label for="manualTemperature">Temperatura °C</label>
                     <input type="number" id="manualTemperature" placeholder="28.5" step="0.1">
                 </div>
+
                 <div class="form-group">
                     <label for="manualHumidity">Humedad %</label>
                     <input type="number" id="manualHumidity" placeholder="70.2" step="0.1">
                 </div>
+
             </div>
+
             <div class="form-actions">
                 <button class="btn btn-primary" onclick="sendManualReading()">
                     ＋ Guardar lectura
@@ -78,6 +87,7 @@
                     Limpiar
                 </button>
             </div>
+
             <p id="manualMessage"></p>
         </div>
     </div>
@@ -92,6 +102,7 @@
                 ↻ Actualizar
             </button>
         </div>
+
         <div class="panel-body">
             <div class="table-wrap">
                 <table>
