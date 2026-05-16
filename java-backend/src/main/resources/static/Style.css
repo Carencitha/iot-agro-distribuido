@@ -210,6 +210,10 @@ header {
     animation: fadeUp 0.5s ease 0.1s both;
 }
 
+.panel + .panel {
+    margin-top: 24px;
+}
+
 .panel-head {
     display: flex;
     align-items: center;
@@ -240,6 +244,7 @@ header {
 .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 7px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.84rem;
@@ -327,7 +332,7 @@ header {
     color: var(--text-soft);
 }
 
-/* ── Select bonito para sensores ───────────────────────── */
+/* ── Select bonito para sensores y filtros ─────────────── */
 .form-group select {
     cursor: pointer;
     font-weight: 600;
@@ -384,7 +389,6 @@ header {
     box-shadow: inset 0 1px 2px rgba(45, 74, 34, 0.05);
 }
 
-/* Opcional: pequeño efecto visual cuando el nodo está bloqueado */
 .form-group input[readonly]:focus {
     background:
             linear-gradient(135deg, rgba(232, 240, 229, 0.95), rgba(245, 240, 232, 0.8));
@@ -408,7 +412,51 @@ header {
     min-height: 20px;
 }
 
-/* ── 10. Tabla ──────────────────────────────────────────── */
+/* ── 10. Filtros de visualización ───────────────────────── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 18px 24px;
+    align-items: end;
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.filter-actions .btn {
+    min-height: 46px;
+    white-space: nowrap;
+}
+
+#filterNode,
+#filterSensor,
+#filterDate {
+    background-color: var(--cream);
+    color: var(--moss);
+    font-weight: 700;
+}
+
+/* Mejora visual específica para el campo fecha */
+#filterDate {
+    cursor: pointer;
+}
+
+#filterDate::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.75;
+    filter: sepia(20%) saturate(120%) hue-rotate(55deg);
+}
+
+#filterDate::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* ── 11. Tabla ──────────────────────────────────────────── */
 .table-wrap {
     overflow-x: auto;
 }
@@ -449,7 +497,16 @@ tbody td {
     vertical-align: middle;
 }
 
-/* ── 11. Badges de estado ───────────────────────────────── */
+/* Mensaje cuando no hay lecturas para los filtros */
+.empty-table {
+    text-align: center;
+    padding: 28px 14px !important;
+    color: var(--text-soft);
+    font-weight: 600;
+    background: rgba(232, 240, 229, 0.45);
+}
+
+/* ── 12. Badges de estado ───────────────────────────────── */
 .badge {
     display: inline-block;
     font-size: 0.72rem;
@@ -473,7 +530,7 @@ tbody td {
     color: #B43C32;
 }
 
-/* ── 12. Estados de lectura ─────────────────────────────── */
+/* ── 13. Estados de lectura ─────────────────────────────── */
 .status-normal {
     color: var(--leaf);
     font-weight: 700;
@@ -484,7 +541,7 @@ tbody td {
     font-weight: 700;
 }
 
-/* ── 13. Mensajes del formulario manual ─────────────────── */
+/* ── 14. Mensajes del formulario manual ─────────────────── */
 .message-ok {
     color: var(--leaf) !important;
     font-weight: 600;
@@ -495,7 +552,7 @@ tbody td {
     font-weight: 600;
 }
 
-/* ── 14. Lecturas manuales ──────────────────────────────── */
+/* ── 15. Lecturas manuales ──────────────────────────────── */
 .manual-reading {
     background: rgba(232, 184, 75, 0.22);
     font-weight: 700;
@@ -512,7 +569,7 @@ tbody td {
     background: rgba(232, 184, 75, 0.34);
 }
 
-/* ── 15. Animaciones ────────────────────────────────────── */
+/* ── 16. Animaciones ────────────────────────────────────── */
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -525,7 +582,7 @@ tbody td {
     }
 }
 
-/* ── 16. Responsive ─────────────────────────────────────── */
+/* ── 17. Responsive ─────────────────────────────────────── */
 @media (max-width: 720px) {
     .metrics {
         grid-template-columns: 1fr;
@@ -533,6 +590,20 @@ tbody td {
 
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .filter-actions .btn {
+        width: 100%;
+        justify-content: center;
     }
 
     header {

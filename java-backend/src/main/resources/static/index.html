@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard IoT Agrícola</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,6 +23,7 @@
                 <p>Monitoreo de temperatura y humedad en tiempo real</p>
             </div>
         </div>
+
         <div class="header-badge">
             <span class="pulse"></span>
             Sistema activo
@@ -33,10 +36,12 @@
             <h2>Nodo actual</h2>
             <p id="nodeId">---</p>
         </div>
+
         <div class="card">
             <h2>Total de lecturas</h2>
             <p id="totalReadings">0</p>
         </div>
+
         <div class="card">
             <h2>Estado</h2>
             <p id="status">---</p>
@@ -83,6 +88,7 @@
                 <button class="btn btn-primary" onclick="sendManualReading()">
                     ＋ Guardar lectura
                 </button>
+
                 <button class="btn btn-secondary" onclick="clearManualForm()">
                     Limpiar
                 </button>
@@ -92,12 +98,64 @@
         </div>
     </div>
 
+    <!-- ── Filtros de lecturas ── -->
+    <div class="panel">
+        <div class="panel-head">
+            <div class="panel-head-left">
+                <h2>Filtros de visualización</h2>
+                <p>Filtra las lecturas por nodo de origen, sensor y fecha.</p>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="filter-grid">
+
+                <div class="form-group">
+                    <label for="filterNode">Filtrar por nodo</label>
+                    <select id="filterNode" onchange="applyFilters()">
+                        <option value="all">Todos los nodos</option>
+                        <option value="machine-1">machine-1</option>
+                        <option value="machine-2">machine-2</option>
+                        <option value="machine-3">machine-3</option>
+                        <option value="machine-4">machine-4</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filterSensor">Filtrar por sensor</label>
+                    <select id="filterSensor" onchange="applyFilters()">
+                        <option value="all">Todos los sensores</option>
+                        <option value="sensor-1">sensor-1</option>
+                        <option value="sensor-2">sensor-2</option>
+                        <option value="sensor-3">sensor-3</option>
+                        <option value="sensor-4">sensor-4</option>
+                        <option value="sensor-5">sensor-5</option>
+                        <option value="manual">Lecturas manuales</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filterDate">Filtrar por fecha</label>
+                    <input type="date" id="filterDate" onchange="applyFilters()">
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        Limpiar filtros
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- ── Tabla de lecturas ── -->
     <div class="panel">
         <div class="panel-head">
             <div class="panel-head-left">
                 <h2>Últimas lecturas procesadas</h2>
             </div>
+
             <button class="btn btn-refresh" onclick="loadDashboard()">
                 ↻ Actualizar
             </button>
@@ -117,6 +175,7 @@
                         <th>Fecha</th>
                     </tr>
                     </thead>
+
                     <tbody id="readingsTable"></tbody>
                 </table>
             </div>

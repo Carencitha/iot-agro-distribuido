@@ -42,8 +42,26 @@ public class SensorController {
         );
     }
 
+    /*
+        Funcionamiento:
+        - Sin filtros: devuelve solo las últimas lecturas para no saturar el dashboard.
+        - Con filtros: consulta el histórico completo en PostgreSQL.
+    */
     @GetMapping("/readings")
-    public List<Map<String, Object>> getLatestReadings() {
+    public List<Map<String, Object>> getReadings(
+            @RequestParam(required = false) String nodeId,
+            @RequestParam(required = false) String sensor,
+            @RequestParam(required = false) String date
+    ) {
+        boolean hasFilters =
+                hasText(nodeId) ||
+                        hasText(sensor) ||
+                        hasText(date);
+
+        if (hasFilters) {
+            return repository.findFiltered(nodeId, sensor, date);
+        }
+
         return repository.findLatest();
     }
 
@@ -86,5 +104,9 @@ public class SensorController {
         if (reading.getTimestamp() == null || reading.getTimestamp().isBlank()) {
             throw new IllegalArgumentException("timestamp es obligatorio");
         }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank() && !"all".equalsIgnoreCase(value);
     }
 }

@@ -40,9 +40,7 @@ function configureManualForm(nodeId) {
     /*
         El nodo origen queda fijo según la máquina actual.
         Ejemplo:
-        - Caren: machine-1
-        - Fredy: machine-2
-        - André: machine-3
+        machine-1, machine-2, machine-3, machine-4.
     */
     nodeInput.value = nodeId;
     nodeInput.readOnly = true;
@@ -77,7 +75,9 @@ function configureManualForm(nodeId) {
 
 async function loadReadings() {
     try {
-        const response = await fetch("/api/readings");
+        const url = buildReadingsUrl();
+
+        const response = await fetch(url);
 
         if (!response.ok) {
             throw new Error("Error cargando lecturas");
@@ -85,63 +85,143 @@ async function loadReadings() {
 
         const data = await response.json();
 
-        const table = document.getElementById("readingsTable");
-        table.innerHTML = "";
-
-        data.forEach(reading => {
-            const row = document.createElement("tr");
-
-            /*
-                Se obtiene el sensor_id teniendo en cuenta dos posibles formatos:
-                - sensor_id: cuando viene desde PostgreSQL.
-                - sensorId: cuando viene desde Java/JavaScript.
-            */
-            const sensorId = reading.sensor_id || reading.sensorId || "";
-
-            /*
-                Reconoce lecturas manuales sin importar mayúsculas/minúsculas.
-            */
-            const sensorIdLower = sensorId.toLowerCase();
-
-            const isManualReading =
-                sensorIdLower.startsWith("manual") ||
-                sensorIdLower.includes("manual");
-
-            const statusClass = reading.status === "NORMAL"
-                ? "status-normal"
-                : "status-alert";
-
-            row.innerHTML = `
-                <td>${reading.node_id || reading.nodeId || "---"}</td>
-                <td>${sensorId}</td>
-                <td>${reading.temperature} °C</td>
-                <td>${reading.humidity} %</td>
-                <td class="${statusClass}">${reading.status}</td>
-                <td>${reading.processed_by || reading.processedBy || "---"}</td>
-                <td>${new Date(reading.timestamp).toLocaleString()}</td>
-            `;
-
-            /*
-                Si la lectura es manual, se resalta en la tabla.
-            */
-            if (isManualReading) {
-                row.classList.add("manual-reading");
-
-                row.querySelectorAll("td").forEach(cell => {
-                    cell.style.backgroundColor = "rgba(232, 184, 75, 0.28)";
-                    cell.style.fontWeight = "700";
-                    cell.style.textDecoration = "underline";
-                    cell.style.textDecorationThickness = "2px";
-                    cell.style.textUnderlineOffset = "4px";
-                });
-            }
-
-            table.appendChild(row);
-        });
+        renderReadings(data);
 
     } catch (error) {
         console.error("Error cargando lecturas:", error);
     }
+}
+
+function buildReadingsUrl() {
+    const filterNode = document.getElementById("filterNode")?.value || "all";
+    const filterSensor = document.getElementById("filterSensor")?.value || "all";
+    const filterDate = document.getElementById("filterDate")?.value || "";
+
+    const params = new URLSearchParams();
+
+    /*
+        Si no hay filtros, se llama:
+        /api/readings
+
+        El backend devuelve solo las últimas 50.
+    */
+    if (filterNode !== "all") {
+        params.append("nodeId", filterNode);
+    }
+
+    if (filterSensor !== "all") {
+        params.append("sensor", filterSensor);
+    }
+
+    if (filterDate) {
+        params.append("date", filterDate);
+    }
+
+    const queryString = params.toString();
+
+    if (queryString) {
+        return `/api/readings?${queryString}`;
+    }
+
+    return "/api/readings";
+}
+
+function applyFilters() {
+    loadReadings();
+}
+
+function clearFilters() {
+    const filterNode = document.getElementById("filterNode");
+    const filterSensor = document.getElementById("filterSensor");
+    const filterDate = document.getElementById("filterDate");
+
+    if (filterNode) {
+        filterNode.value = "all";
+    }
+
+    if (filterSensor) {
+        filterSensor.value = "all";
+    }
+
+    if (filterDate) {
+        filterDate.value = "";
+    }
+
+    loadReadings();
+}
+
+function renderReadings(readings) {
+    const table = document.getElementById("readingsTable");
+    table.innerHTML = "";
+
+    if (!readings || readings.length === 0) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td colspan="7" class="empty-table">
+                No hay lecturas para los filtros seleccionados.
+            </td>
+        `;
+
+        table.appendChild(row);
+        return;
+    }
+
+    readings.forEach(reading => {
+        const row = document.createElement("tr");
+
+        const nodeId = reading.node_id || reading.nodeId || "---";
+        const sensorId = reading.sensor_id || reading.sensorId || "";
+        const processedBy = reading.processed_by || reading.processedBy || "---";
+
+        const sensorIdLower = sensorId.toLowerCase();
+
+        const isManualReading =
+            sensorIdLower.startsWith("manual") ||
+            sensorIdLower.includes("manual");
+
+        const statusClass = reading.status === "NORMAL"
+            ? "status-normal"
+            : "status-alert";
+
+        row.innerHTML = `
+            <td>${nodeId}</td>
+            <td>${sensorId}</td>
+            <td>${reading.temperature} °C</td>
+            <td>${reading.humidity} %</td>
+            <td class="${statusClass}">${reading.status}</td>
+            <td>${processedBy}</td>
+            <td>${formatDateTime(reading.timestamp)}</td>
+        `;
+
+        if (isManualReading) {
+            row.classList.add("manual-reading");
+
+            row.querySelectorAll("td").forEach(cell => {
+                cell.style.backgroundColor = "rgba(232, 184, 75, 0.28)";
+                cell.style.fontWeight = "700";
+                cell.style.textDecoration = "underline";
+                cell.style.textDecorationThickness = "2px";
+                cell.style.textUnderlineOffset = "4px";
+            });
+        }
+
+        table.appendChild(row);
+    });
+}
+
+function formatDateTime(timestamp) {
+    if (!timestamp) {
+        return "---";
+    }
+
+    const date = new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) {
+        return timestamp;
+    }
+
+    return date.toLocaleString();
 }
 
 async function sendManualReading() {
