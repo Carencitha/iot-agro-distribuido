@@ -14,7 +14,6 @@ El sistema permite registrar lecturas automáticas generadas por simuladores Nod
 
 
 
-\---
 
 
 
@@ -52,8 +51,6 @@ Desarrollar una solución distribuida capaz de recibir, procesar, almacenar y vi
 
 | Tecnología | Uso dentro del proyecto |
 
-|---|---|
-
 | Java 21 | Desarrollo del backend |
 
 | Spring Boot | Creación de la API REST |
@@ -84,7 +81,6 @@ El sistema está distribuido en cuatro computadores conectados a una red local.
 
 | Máquina | IP | Componentes |
 
-|---|---|---|
 
 | Machine-1 / Caren | 172.20.10.7 | Backend Java + Dashboard + Node.js + PostgreSQL |
 
@@ -100,7 +96,7 @@ La base de datos PostgreSQL está ubicada en Machine-1 / Caren. Las demás máqu
 
 
 
-```text
+
 
 Machine-1 / Caren
 
@@ -124,7 +120,6 @@ Machine-4 / Samuk
 
 Backend Java + Dashboard + Simulador Node.js
 
-````
 
 
 
@@ -1318,9 +1313,8 @@ Dashboard
 
 \* Fredy
 
-\* André
+\* Andrés
 
-\* Samuk
 
 
 
