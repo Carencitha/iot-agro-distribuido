@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,11 @@ public class SensorController {
     public Map<String, Object> receiveReading(@RequestBody SensorReading reading) {
         validateReading(reading);
 
+        /*
+            La lectura se procesa en segundo plano.
+            Si PostgreSQL está disponible, se guarda normal.
+            Si PostgreSQL está apagado, SensorProcessingService la manda a la cola local.
+        */
         processingService.processAsync(reading);
 
         return Map.of(
@@ -44,8 +50,9 @@ public class SensorController {
 
     /*
         Funcionamiento:
-        - Sin filtros: devuelve solo las últimas lecturas para no saturar el dashboard.
-        - Con filtros: consulta el histórico completo en PostgreSQL.
+        - Sin filtros: devuelve solo las últimas lecturas.
+        - Con filtros: consulta el histórico completo.
+        - Si PostgreSQL está apagado: no revienta el dashboard, devuelve lista vacía.
     */
     @GetMapping("/readings")
     public List<Map<String, Object>> getReadings(
@@ -53,26 +60,49 @@ public class SensorController {
             @RequestParam(required = false) String sensor,
             @RequestParam(required = false) String date
     ) {
-        boolean hasFilters =
-                hasText(nodeId) ||
-                        hasText(sensor) ||
-                        hasText(date);
+        try {
+            boolean hasFilters =
+                    hasText(nodeId) ||
+                            hasText(sensor) ||
+                            hasText(date);
 
-        if (hasFilters) {
-            return repository.findFiltered(nodeId, sensor, date);
+            if (hasFilters) {
+                return repository.findFiltered(nodeId, sensor, date);
+            }
+
+            return repository.findLatest();
+
+        } catch (Exception error) {
+            System.out.println("No se pudieron cargar lecturas desde PostgreSQL: " + error.getMessage());
+            return Collections.emptyList();
         }
-
-        return repository.findLatest();
     }
 
+    /*
+        Métricas del dashboard.
+        Si PostgreSQL está apagado, devuelve estado DB_OFFLINE
+        para que el dashboard siga funcionando.
+    */
     @GetMapping("/metrics")
     public Map<String, Object> getMetrics() {
-        return Map.of(
-                "nodeId", currentNodeId,
-                "totalReadings", repository.countAll(),
-                "readingsByNode", repository.countByNode(),
-                "status", "ONLINE"
-        );
+        try {
+            return Map.of(
+                    "nodeId", currentNodeId,
+                    "totalReadings", repository.countAll(),
+                    "readingsByNode", repository.countByNode(),
+                    "status", "ONLINE"
+            );
+
+        } catch (Exception error) {
+            System.out.println("No se pudieron cargar métricas desde PostgreSQL: " + error.getMessage());
+
+            return Map.of(
+                    "nodeId", currentNodeId,
+                    "totalReadings", 0,
+                    "readingsByNode", Collections.emptyList(),
+                    "status", "DB_OFFLINE"
+            );
+        }
     }
 
     @GetMapping("/health")
